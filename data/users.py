@@ -1,7 +1,9 @@
 import sqlalchemy
-from .db_session import SqlAlchemyBase
+import datetime
+from .db_session import SqlAlchemyBase, create_session
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy_serializer import SerializerMixin
 
 
 association_table = sqlalchemy.Table('usertouser', SqlAlchemyBase.metadata,
@@ -12,14 +14,17 @@ association_table = sqlalchemy.Table('usertouser', SqlAlchemyBase.metadata,
 )
 
 
-class User(SqlAlchemyBase, UserMixin):
+class User(SqlAlchemyBase, SerializerMixin, UserMixin):
     __tablename__ = 'users'
 
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            primary_key=True, autoincrement=True)
     email = sqlalchemy.Column(sqlalchemy.String,
                               index=True, unique=True, nullable=True)
-    hashsed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    token = sqlalchemy.Column(sqlalchemy.String,
+                              index=True, unique=True, nullable=True)
+    token_exp = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
+    hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     nickname = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     about = sqlalchemy.Column(sqlalchemy.String, nullable=True)
 

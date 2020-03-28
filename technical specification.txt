@@ -27,7 +27,7 @@
 	@ notes //Дима
 		- api/notes (get, post)
 		- api/notes/<int:id> (get, put, delete)
-	@ user //Артём
+	@ user //Артём #complete
 		- api/users/<int:id> (get, put, delete)
 		- api/users (post)
 
