@@ -6,17 +6,18 @@
 		- password
 		- nickname
 		- about
-	@ Класс Note //Дима
+	@ Класс Note //Дима #complete
 		- id
 		- authorid
+		- title
 		- text
 		- date
 		- img_file (может отсутствовать)
 		- audio_file (может отсутствовать)
-	@ Класс Categories //Дима
+	@ Класс Categories //Дима #complete
 		- id
 		- name
-	@ NoteToCategories (связь многие ко многим) //Дима
+	@ NoteToCategories (связь многие ко многим) //Дима #complete
 		- noteid
 		- categoryid
 	@ UserToUser (связь многие ко многим) (это получается я хочу сделать таблицу для связи подписчиков) //Артём #complete
