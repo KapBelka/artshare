@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, redirect, render_template
 from data import db_session
 from flask_httpauth import HTTPBasicAuth
 from flask_restful import abort, Api
@@ -10,6 +10,17 @@ import token_resource
 app = Flask(__name__)
 api = Api(app)
 app.config['SECRET_KEY'] = 'artshare_key_2013381'
+
+
+@app.route("/")
+def redirect_to_startpage():
+    return redirect("/index")
+
+
+@app.route("/index")
+def startpage():
+    param = {'title': 'ArtShare'}
+    return render_template('index.html', **param)
 
 
 def main():
