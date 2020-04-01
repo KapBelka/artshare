@@ -1,10 +1,13 @@
-from flask_restful import reqparse, Resource, abort
+from flask_restful import reqparse, Resource, abort, request
 from data.categories import Category, association_table as assoc_table
 from flask import jsonify, g
 from sqlalchemy import desc
 from api_auth import token_auth
 from data.notes import Note
+from data.users import User
 from data import db_session
+import uuid
+
 
 parser = reqparse.RequestParser()
 parser.add_argument('title', required=True)
@@ -26,6 +29,25 @@ class NotesListResourse(Resource):
             text=args['text'],
             authorid=g.current_user.id
         )
+        if 'img_file' in request.files:
+            img_file = request.files['img_file']
+            if img_file.filename.endswith('.jpg'):
+                img_file_name = f"{uuid.uuid4()}.jpg"
+                img_file.save(f"static/img/notes/{img_file_name}")
+            elif img_file.filename.endswith('.png'):
+                img_file_name = f"{uuid.uuid4()}.png"
+                img_file.save(f"static/img/notes/{img_file_name}")
+            else:
+                abort(400, message=f"File type {img_file.filename} not allowed")
+            note.img_file = img_file_name
+        if 'audio_file' in request.files:
+            audio_file = request.files['audio_file']
+            if audio_file.filename.endswith('.mp3'):
+                audio_file_name = f"{uuid.uuid4()}.mp3"
+                audio_file.save(f"static/audio/notes/{audio_file_name}")
+            else:
+                abort(400, message=f"File type {audio_file.filename} not allowed")
+            note.audio_file = audio_file_name
         session.add(note)
         session.commit()
         return jsonify({'success': 'OK'})
@@ -41,15 +63,17 @@ class NotesListResourse(Resource):
         if not args['count']:
             count = 15
         if args['category']:
-            notes = session.query(Note).filter(Note.id <= start_id, assoc_table.c.noteid == Note.id,
-                                               assoc_table.c.categoryid == category).order_by(
-                                               Note.date.desc()).limit(count).all()
+            notes = session.query(Note, User).filter(Note.id <= start_id,
+                            assoc_table.c.noteid == Note.id, assoc_table.c.categoryid == category,
+                            User.id == Note.authorid).order_by(Note.date.desc()).limit(count).all()
         else:
-            notes = session.query(Note).filter(Note.id <= start_id).order_by(Note.date.desc()).limit(count).all()
+            notes = session.query(Note, User).filter(Note.id <= start_id,
+                            User.id == Note.authorid).order_by(Note.date.desc()).limit(count).all()
         if not notes:
             abort(404, message=f"Notes not found")
         return jsonify(
             {
-                'notes': [note.to_dict(only=('id', 'authorid', 'title', 'text')) for note in notes]
+                'notes': [{'note': note_user[0].to_dict(only=('id', 'title', 'text', 'img_file', 'audio_file')),
+                           'author': note_user[1].to_dict(only=('nickname', 'id'))} for note_user in notes]
             }
         )

@@ -1,0 +1,41 @@
+.header {
+    background: rgb(255, 255, 255);
+    padding: 0 10px;
+    margin: 10px;
+}
+
+
+.content-block {
+    margin-left: auto;
+    margin-right: auto;
+    width: 600px
+}
+
+
+.text-right {
+    text-align: right;
+}
+
+
+.player {
+    width: 100%;
+}
+
+.nickname {
+    border-bottom: solid DeepSkyBlue;
+}
+
+
+.note {
+    background: rgb(255, 255, 255);
+    padding: 10px;
+    margin: 10px;
+}
+
+
+body {
+    background: rgb(228, 228, 228); /* Фоновый цвет и фоновый рисунок*/
+    background-attachment: fixed; /* Фон страницы фиксируется */
+    background-repeat: no-repeat; /* Изображение повторяется по горизонтали */
+    background-size: 100%;
+}
