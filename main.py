@@ -1,15 +1,36 @@
-from flask import Flask, redirect, render_template
+from flask import Flask, redirect, render_template, request, make_response
+from flask_wtf import FlaskForm
 from data import db_session
 from flask_restful import abort, Api
 from data.users import User
 from users_api.classes import users_list_resource, users_resource
 from notes_api.classes import notes_list_resourse, notes_resourse
+from wtforms import *
+from wtforms.fields.html5 import *
+from wtforms.validators import DataRequired
 import token_resource
 import requests
 
 app = Flask(__name__)
 api = Api(app)
 app.config['SECRET_KEY'] = 'artshare_key_2013381'
+
+
+class LoginForm(FlaskForm):
+    email = EmailField('Email', validators=[DataRequired()])
+    password = PasswordField('Пароль', validators=[DataRequired()])
+    submit = SubmitField('Войти')
+
+
+def get_token():
+    token = request.cookies.get("token")
+    if token:
+        return token
+
+
+def validate_token(token):
+    answer = requests.post('http://127.0.0.1:5000/api/token', headers={'Authorization': f'Bearer {token}'}).json()
+    return 'success' in answer
 
 
 @app.route("/")
@@ -19,9 +40,24 @@ def redirect_to_startpage():
 
 @app.route("/index")
 def startpage():
-    notes = requests.get('http://127.0.0.1:5000/api/notes').json()
-    param = {'title': 'ArtShare'}
+    param = {'title': 'ArtShare',
+             'is_auth': validate_token(get_token())}
     return render_template('index.html', **param)
+
+
+@app.route("/login", methods=['GET', 'POST'])
+def loginpage():
+    form = LoginForm()
+    if form.validate_on_submit():
+        data = requests.get('http://127.0.0.1:5000/api/token', auth=(form.email.data, form.password.data)).json()
+        if data:
+            res = make_response(redirect("/"))
+            res.set_cookie("token", data['token'], max_age=60 * 60)
+            return res
+        return render_template('login.html', title='Авторизация',
+                               message="Неправильный логин или пароль",
+                               form=form)
+    return render_template('login.html', title='Авторизация', form=form)
 
 
 def main():

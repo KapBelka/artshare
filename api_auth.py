@@ -15,7 +15,7 @@ def verify_password(email, password):
     if user:
         g.current_user = user
         g.session = session
-        return (user.check_password(password) or user.hashed_password == password)
+        return (user.check_password(password))
     abort(401, error="Unauthorized")
 
 

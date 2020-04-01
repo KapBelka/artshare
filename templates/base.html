@@ -20,12 +20,18 @@
         </a>
         <div class="collapse navbar-collapse" id="navbar-main">
             <ul class="nav navbar-nav ml-auto">
+                {% if not is_auth %}
                 <li class="nav-item">
                     <a class="nav-link" href="/login"><button type='button' class="btn btn-info">Войти</button></a>
                 </li>
-                <li class="nav-item active">
+                <li class="nav-item">
                     <a class="nav-link" href="/register"><button type='button' class="btn btn-info">Регистрация</button></a>
                 </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout"><button type='button' class="btn btn-info">Выйти</button></a>
+                </li>
+                {% endif %}
             </ul>
         </div>
     </nav>
