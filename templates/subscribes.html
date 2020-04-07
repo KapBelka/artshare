@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <div>
+        {% for user in subscribe_users %}
+        <p class="subscribes">{{user['nickname']}}<p class='text-right'><a href='/subscribe/{{user["id"]}}'><button type='button' class='btn btn-info'>Отписаться</button></a></p></p>
+        {% endfor %}
+    </div>
+{% endblock %}

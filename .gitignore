@@ -10,3 +10,7 @@ notes_api/classes/__pycache__/notes_resourse.cpython-37.pyc
 notes_api/classes/__pycache__/notes_list_resourse.cpython-37.pyc
 data/__pycache__/notes.cpython-37.pyc
 data/__pycache__/categories.cpython-37.pyc
+users_api/classes/__pycache__/subscribe_list_resource.cpython-37.pyc
+users_api/classes/__pycache__/subscribe_resource.cpython-37.pyc
+users_api/classes/__pycache__/subscript_list_resource.cpython-37.pyc
+users_api/classes/__pycache__/subscript_resource.cpython-37.pyc

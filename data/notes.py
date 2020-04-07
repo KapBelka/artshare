@@ -17,3 +17,4 @@ class Note(SqlAlchemyBase, SerializerMixin):
     categories = orm.relation("Category",
                               secondary="notetocategories",
                               backref="notes")
+    user = orm.relation('User')
