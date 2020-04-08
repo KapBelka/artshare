@@ -19,6 +19,7 @@ class UsersResource(Resource):
         if user:
             return jsonify(user.to_dict(only=('about', 'email', 'id', 'nickname')))
         abort(404, message=f"User {user_id} not found")
+
     @token_auth.login_required
     def put(self, user_id):
         session = g.session
@@ -37,6 +38,7 @@ class UsersResource(Resource):
             session.commit()
             return jsonify({'success': 'OK'})
         abort(403, error="Forbidden")
+
     @token_auth.login_required
     def delete(self, user_id):
         session = g.session

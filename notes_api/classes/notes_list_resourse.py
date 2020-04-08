@@ -15,8 +15,29 @@ parser.add_argument('text', required=True)
 
 parser_for_get = reqparse.RequestParser()
 parser_for_get.add_argument('start_id', type=int)
-parser_for_get.add_argument('count', type=int)
+parser_for_get.add_argument('count', type=int, default=15)
 parser_for_get.add_argument('category', type=int)
+
+
+def create_img_file(img_file):
+    if img_file.filename.endswith('.jpg'):
+        img_file_name = f"{uuid.uuid4()}.jpg"
+        img_file.save(f"static/img/notes/{img_file_name}")
+    elif img_file.filename.endswith('.png'):
+        img_file_name = f"{uuid.uuid4()}.png"
+        img_file.save(f"static/img/notes/{img_file_name}")
+    else:
+        abort(400, message=f"File type {img_file.filename} not allowed")
+    return img_file_name
+
+
+def create_audio_file(audio_file):
+    if audio_file.filename.endswith('.mp3'):
+        audio_file_name = f"{uuid.uuid4()}.mp3"
+        audio_file.save(f"static/audio/notes/{audio_file_name}")
+    else:
+        abort(400, message=f"File type {audio_file.filename} not allowed")
+    return audio_file_name
 
 
 class NotesListResourse(Resource):
@@ -31,23 +52,10 @@ class NotesListResourse(Resource):
         )
         if 'img_file' in request.files:
             img_file = request.files['img_file']
-            if img_file.filename.endswith('.jpg'):
-                img_file_name = f"{uuid.uuid4()}.jpg"
-                img_file.save(f"static/img/notes/{img_file_name}")
-            elif img_file.filename.endswith('.png'):
-                img_file_name = f"{uuid.uuid4()}.png"
-                img_file.save(f"static/img/notes/{img_file_name}")
-            else:
-                abort(400, message=f"File type {img_file.filename} not allowed")
-            note.img_file = img_file_name
+            note.img_file = create_img_file(img_file)
         if 'audio_file' in request.files:
             audio_file = request.files['audio_file']
-            if audio_file.filename.endswith('.mp3'):
-                audio_file_name = f"{uuid.uuid4()}.mp3"
-                audio_file.save(f"static/audio/notes/{audio_file_name}")
-            else:
-                abort(400, message=f"File type {audio_file.filename} not allowed")
-            note.audio_file = audio_file_name
+            note.audio_file = create_audio_file(audio_file)
         session.add(note)
         session.commit()
         return jsonify({'success': 'OK'})
@@ -60,8 +68,6 @@ class NotesListResourse(Resource):
         category = args['category']
         if not args['start_id']:
             start_id = session.query(Note).order_by(Note.id.desc()).first().id
-        if not args['count']:
-            count = 15
         if args['category']:
             notes = session.query(Note, User).filter(Note.id <= start_id,
                             assoc_table.c.noteid == Note.id, assoc_table.c.categoryid == category,

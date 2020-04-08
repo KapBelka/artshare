@@ -3,11 +3,11 @@ from flask import jsonify, g
 from data.notes import Note
 from data import db_session
 from api_auth import token_auth
+from notes_list_resourse import create_audio_file, create_img_file
 
 parser = reqparse.RequestParser()
 parser.add_argument('title')
 parser.add_argument('text')
-parser.add_argument('authorid')
 
 
 class NotesResourse(Resource):
@@ -21,15 +21,20 @@ class NotesResourse(Resource):
     @token_auth.login_required
     def put(self, note_id):
         session = g.session
-        note = g.current_note
-        if note.id == note_id:
+        user = g.current_user
+        note = session.query(Note).get(note_id)
+        if note.authorid == user.id:
             args = parser.parse_args()
-            if 'authorid' in args:
-                note.authorid = args['authorid']
             if 'title' in args:
                 note.title = args['title']
             if 'text' in args:
                 note.text = args['text']
+            if 'img_file' in request.files:
+                img_file = request.files['img_file']
+                note.img_file = create_img_file(img_file)
+            if 'audio_file' in request.files:
+                audio_file = request.files['audio_file']
+                note.audio_file = create_audio_file(audio_file)
             session.add(note)
             session.commit()
             return jsonify({'success': 'OK'})
@@ -38,8 +43,9 @@ class NotesResourse(Resource):
     @token_auth.login_required
     def delete(self, note_id):
         session = g.session
-        note = g.current_note
-        if note.id == note_id:
+        user = g.current_user
+        note = session.query(Note).get(note_id)
+        if note.authorid == user.id:
             session.delete(note)
             session.commit()
             return jsonify({'success': 'OK'})
