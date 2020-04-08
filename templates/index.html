@@ -2,7 +2,20 @@
 
 
 {% block content %}
-    <div id="notes-list">
+    <div class="right-block rounded">
+        <ul>
+            <li>Лента</li>
+            <li>Подписки</li>
+            <li>
+                <select id="category" onchange="update_data()">
+                    {% for elem in categories %}
+                        <option value="{{elem['id']}}">{{elem['name']}}</option>
+                    {% endfor %}
+                </select>
+            </li>
+        </ul>
+    </div>
+    <div id="notes-list" class="content-block">
     </div>
     <script src="/static/js/notes.js"></script>
 {% endblock %}

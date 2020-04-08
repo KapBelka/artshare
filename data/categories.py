@@ -4,14 +4,6 @@ from .db_session import SqlAlchemyBase
 from sqlalchemy_serializer import SerializerMixin
 
 
-association_table = sqlalchemy.Table("notetocategories", SqlAlchemyBase.metadata,
-                                     sqlalchemy.Column('noteid', sqlalchemy.Integer,
-                                                       sqlalchemy.ForeignKey('notes.id')),
-                                     sqlalchemy.Column('categoryid', sqlalchemy.Integer,
-                                                       sqlalchemy.ForeignKey('categories.id'))
-                                     )
-
-
 class Category(SqlAlchemyBase, SerializerMixin):
     __tablename__ = 'categories'
 

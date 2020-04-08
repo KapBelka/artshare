@@ -30,6 +30,12 @@
     border-bottom: solid DeepSkyBlue;
 }
 
+.right-block {
+    background: rgb(255, 255, 255);
+    margin-right: 10%;
+    margin-left: auto;
+    float: right;
+}
 
 .inline {
     float: left;

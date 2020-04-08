@@ -1,5 +1,5 @@
 from flask_restful import reqparse, Resource, abort, request
-from data.categories import Category, association_table as assoc_table
+from data.categories import Category
 from flask import jsonify, g
 from sqlalchemy import desc
 from api_auth import token_auth
@@ -12,6 +12,7 @@ import uuid
 parser = reqparse.RequestParser()
 parser.add_argument('title', required=True)
 parser.add_argument('text', required=True)
+parser.add_argument('category', required=True)
 
 parser_for_get = reqparse.RequestParser()
 parser_for_get.add_argument('start_id', type=int)
@@ -45,9 +46,12 @@ class NotesListResourse(Resource):
     def post(self):
         args = parser.parse_args()
         session = g.session
+        if not session.query(Category).get(args['category']):
+            abort(404, message=f"Category not found")
         note = Note(
             title=args['title'],
             text=args['text'],
+            category=args['category'],
             authorid=g.current_user.id
         )
         if 'img_file' in request.files:
@@ -65,12 +69,10 @@ class NotesListResourse(Resource):
         session = db_session.create_session()
         start_id = args['start_id']
         count = args['count']
-        category = args['category']
         if not args['start_id']:
             start_id = session.query(Note).order_by(Note.id.desc()).first().id
         if args['category']:
-            notes = session.query(Note, User).filter(Note.id <= start_id,
-                            assoc_table.c.noteid == Note.id, assoc_table.c.categoryid == category,
+            notes = session.query(Note, User).filter(Note.id <= start_id, Note.category == args['category'],
                             User.id == Note.authorid).order_by(Note.date.desc()).limit(count).all()
         else:
             notes = session.query(Note, User).filter(Note.id <= start_id,

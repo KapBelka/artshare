@@ -55,8 +55,13 @@ def redirect_to_startpage():
 
 @app.route("/index")
 def startpage():
+    json_categories = requests.get(f'{API_SERVER}/api/notes/category').json()
+    print(json_categories)
+    categories = [{"id": "null", "name": '--Все--'}]
+    categories.extend(json_categories['categories'])
     param = {'title': 'ArtShare',
-             'is_auth': validate_token(get_token())}
+             'is_auth': validate_token(get_token()),
+             'categories': categories}
     return render_template('index.html', **param)
 
 
@@ -67,7 +72,6 @@ def subscribespage():
     if not is_token_valid:
         return redirect('/')
     subscribe_users = requests.get(f'{API_SERVER}/api/users/subscribe', headers={'Authorization': f'Bearer {token}'}).json()
-    print(subscribe_users)
     param = {'title': 'ArtShare',
              'is_auth': is_token_valid,
              'subscribe_users': subscribe_users['users']}
