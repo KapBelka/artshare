@@ -23,10 +23,11 @@ class User(SqlAlchemyBase, SerializerMixin, UserMixin):
     notes = orm.relation("Note", back_populates='user')
 
     def add_subscribe(self, user_id):
-        if len(self.subscribe_users):
-            self.subscribe_users += f'{user_id}:'
-        else:
-            self.subscribe_users = f':{user_id}:'
+        if f':{user_id}:' not in self.subscribe_users:
+            if len(self.subscribe_users):
+                self.subscribe_users += f'{user_id}:'
+            else:
+                self.subscribe_users = f':{user_id}:'
 
     def remove_subscribe(self, user_id):
         self.subscribe_users = self.subscribe_users.replace(f':{user_id}:', ':')

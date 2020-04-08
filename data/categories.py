@@ -12,7 +12,7 @@ association_table = sqlalchemy.Table("notetocategories", SqlAlchemyBase.metadata
                                      )
 
 
-class Category(SqlAlchemyBase):
+class Category(SqlAlchemyBase, SerializerMixin):
     __tablename__ = 'categories'
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
