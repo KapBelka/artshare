@@ -31,10 +31,14 @@
 }
 
 
+.inline {
+    float: left;
+}
+
 .note {
     background: rgb(255, 255, 255);
-    padding: 10px;
-    margin: 10px;
+    padding: 6px;
+    margin: 6px;
 }
 
 

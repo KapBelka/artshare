@@ -6,14 +6,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy_serializer import SerializerMixin
 
 
-association_table = sqlalchemy.Table('usertouser', SqlAlchemyBase.metadata,
-    sqlalchemy.Column('firstuserid', sqlalchemy.Integer,
-                      sqlalchemy.ForeignKey('users.id')),
-    sqlalchemy.Column('seconduserid', sqlalchemy.Integer,
-                      sqlalchemy.ForeignKey('users.id'))
-)
-
-
 class User(SqlAlchemyBase, SerializerMixin, UserMixin):
     __tablename__ = 'users'
 
@@ -27,7 +19,17 @@ class User(SqlAlchemyBase, SerializerMixin, UserMixin):
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     nickname = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     about = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    subscribe_users = sqlalchemy.Column(sqlalchemy.String, nullable=True, default='')
     notes = orm.relation("Note", back_populates='user')
+
+    def add_subscribe(self, user_id):
+        if len(self.subscribe_users):
+            self.subscribe_users += f'{user_id}:'
+        else:
+            self.subscribe_users = f':{user_id}:'
+
+    def remove_subscribe(self, user_id):
+        self.subscribe_users = self.subscribe_users.replace(f':{user_id}:', ':')
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)

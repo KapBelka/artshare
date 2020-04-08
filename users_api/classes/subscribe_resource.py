@@ -1,6 +1,6 @@
 from flask_restful import reqparse, Resource, abort
 from flask import jsonify, g
-from data.users import User, association_table as assoc_table
+from data.users import User
 from data import db_session
 from api_auth import auth, token_auth
 
@@ -12,6 +12,8 @@ class SubscribeResource(Resource):
         user = g.current_user
         to_user = session.query(User).get(user_id)
         if to_user:
+            user.add_subscribe(user_id)
+            session.commit()
             return jsonify({'success': 'OK'})
         return abort(404, message=f"User {user_id} not found")
     
@@ -21,7 +23,7 @@ class SubscribeResource(Resource):
         user = g.current_user
         to_user = session.query(User).get(user_id)
         if to_user:
-            pass
+            user.remove_subscribe(user_id)
             session.commit()
             return jsonify({'success': 'OK'})
         return abort(404, message=f"User {user_id} not found")
@@ -30,5 +32,6 @@ class SubscribeResource(Resource):
         session = db_session.create_session()
         user = session.query("User").get(user_id)
         if user:
-            return jsonify({"users": [usr.to_dict(only=('id', 'nickname')) for usr in user.subscript_users]})
+            users = session.query(User).filter(User.id.in_(user.subscribe_users[1:-1].split(':'))).order_by(User.id.desc()).all()
+            return jsonify({"users": [usr.to_dict(only=('id', 'nickname')) for usr in users]})
         return abort(404, message=f"User {user_id} not found")

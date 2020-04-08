@@ -4,7 +4,13 @@
 {% block content %}
     <div>
         {% for user in subscribe_users %}
-        <p class="subscribes">{{user['nickname']}}<p class='text-right'><a href='/subscribe/{{user["id"]}}'><button type='button' class='btn btn-info'>Отписаться</button></a></p></p>
+        <div class='note rounded'>
+            <p class='inline'>
+            {{user['nickname']}}</p>
+            <p class='text-right'><a href='/subscribe/{{user["id"]}}'><button type='button' class='btn btn-info'>Отписаться</button></a></p>
+            <p style="clear:both;"></p>
+            <p class='nickname'>
+        </div>
         {% endfor %}
     </div>
 {% endblock %}

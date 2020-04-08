@@ -53,6 +53,7 @@ def subscribespage():
     if not is_token_valid:
         return redirect('/')
     subscribe_users = requests.get('http://127.0.0.1:5000/api/users/subscribe', headers={'Authorization': f'Bearer {token}'}).json()
+    print(subscribe_users)
     param = {'title': 'ArtShare',
              'is_auth': is_token_valid,
              'subscribe_users': subscribe_users['users']}
