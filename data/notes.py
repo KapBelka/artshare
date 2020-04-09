@@ -14,7 +14,5 @@ class Note(SqlAlchemyBase, SerializerMixin):
     date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
     img_file = sqlalchemy.Column(sqlalchemy.String)
     audio_file = sqlalchemy.Column(sqlalchemy.String)
-    categories = orm.relation("Category",
-                              secondary="notetocategories",
-                              backref="notes")
+    category = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("categories.id"))
     user = orm.relation('User')

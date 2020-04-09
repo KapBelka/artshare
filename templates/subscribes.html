@@ -2,12 +2,12 @@
 
 
 {% block content %}
-    <div>
+    <div class='content-block'>
         {% for user in subscribe_users %}
         <div class='note rounded'>
             <p class='inline'>
             {{user['nickname']}}</p>
-            <p class='text-right'><a href='/subscribe/{{user["id"]}}'><button type='button' class='btn btn-info'>Отписаться</button></a></p>
+            <p class='text-right'><a href='/unsubscribe/{{user["id"]}}'><button type='button' class='btn btn-info'>Отписаться</button></a></p>
             <p style="clear:both;"></p>
             <p class='nickname'>
         </div>

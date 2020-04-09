@@ -44,8 +44,10 @@ def get_token():
 
 
 def validate_token(token):
-    answer = requests.post(f'{API_SERVER}/api/token', headers={'Authorization': f'Bearer {token}'}).json()
-    return 'success' in answer
+    answer = requests.post(f'{API_SERVER}/api/token', headers={'Authorization': f'Bearer {token}'})
+    if answer:
+        return answer.json()
+    return False
 
 
 @app.route("/")
@@ -55,8 +57,16 @@ def redirect_to_startpage():
 
 @app.route("/index")
 def startpage():
+    json_categories = requests.get(f'{API_SERVER}/api/notes/category').json()
+    categories = [{"id": "null", "name": '--Все--'}]
+    categories.extend(json_categories['categories'])
+    user = validate_token(get_token())
     param = {'title': 'ArtShare',
-             'is_auth': validate_token(get_token())}
+             'is_auth': False,
+             'categories': categories}
+    if user:
+        param['is_auth'] = True
+        param['user'] = user['user']
     return render_template('index.html', **param)
 
 
@@ -67,7 +77,6 @@ def subscribespage():
     if not is_token_valid:
         return redirect('/')
     subscribe_users = requests.get(f'{API_SERVER}/api/users/subscribe', headers={'Authorization': f'Bearer {token}'}).json()
-    print(subscribe_users)
     param = {'title': 'ArtShare',
              'is_auth': is_token_valid,
              'subscribe_users': subscribe_users['users']}
@@ -84,6 +93,16 @@ def subscribe(user_id):
     return redirect('/')
 
 
+@app.route("/subscribe/<int:user_id>")
+def unsubscribe(user_id):
+    token = get_token()
+    is_token_valid = validate_token(get_token())
+    if not is_token_valid:
+        return redirect('/')
+    requests.delete(f'{API_SERVER}/api/users/subscribe/{user_id}', headers={'Authorization': f'Bearer {token}'}).json()
+    return redirect('/')
+
+
 @app.route("/add_note", methods=['GET', 'POST'])
 def add_notepage():
     token = get_token()
@@ -96,7 +115,8 @@ def add_notepage():
     if form.validate_on_submit():
         data = {
             'title': form.title.data,
-            'text': form.text.data}
+            'text': form.text.data,
+            'category': form.category.data}
         files = {}
         if form.data["img_file"]:
             files["img_file"] = (form.data["img_file"].filename, form.data["img_file"].read(), form.data["img_file"].content_type)

@@ -29,7 +29,7 @@ class TokenResource(Resource):
         return jsonify({'token': token})
     @token_auth.login_required
     def post(self):
-        return jsonify({'success': 'OK'})
+        return jsonify({'user': g.current_user.to_dict(only=('id', 'nickname', 'about', 'email'))})
     @token_auth.login_required
     def delete(self):
         g.current_user.token_exp = datetime.datetime.utcnow() - datetime.timedelta(seconds=1)
