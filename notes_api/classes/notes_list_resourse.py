@@ -18,6 +18,7 @@ parser_for_get = reqparse.RequestParser()
 parser_for_get.add_argument('start_id', type=int)
 parser_for_get.add_argument('count', type=int, default=15)
 parser_for_get.add_argument('category', type=int)
+parser_for_get.add_argument('subscribe', type=int)
 
 
 def create_img_file(img_file):
@@ -68,15 +69,18 @@ class NotesListResourse(Resource):
         args = parser_for_get.parse_args()
         session = db_session.create_session()
         start_id = args['start_id']
+        category = args['category']
+        subscribe = args['subscribe']
         count = args['count']
-        if not args['start_id']:
+        if not start_id:
             start_id = session.query(Note).order_by(Note.id.desc()).first().id
-        if args['category']:
-            notes = session.query(Note, User).filter(Note.id <= start_id, Note.category == args['category'],
-                            User.id == Note.authorid).order_by(Note.date.desc()).limit(count).all()
-        else:
-            notes = session.query(Note, User).filter(Note.id <= start_id,
-                            User.id == Note.authorid).order_by(Note.date.desc()).limit(count).all()
+        query = session.query(Note, User).filter(Note.id <= start_id, User.id == Note.authorid)
+        if category:
+            query = query.filter(Note.category == category)
+        if subscribe:
+            user = session.query(User).get(subscribe)
+            query = query.filter(Note.authorid.in_(user.subscribe_users[1:-1].split(':')))
+        notes = query.order_by(Note.date.desc()).limit(count).all()
         if not notes:
             abort(404, message=f"Notes not found")
         return jsonify(
