@@ -10,7 +10,6 @@ import uuid
 
 
 parser = reqparse.RequestParser()
-parser.add_argument('title', required=True)
 parser.add_argument('text', required=True)
 parser.add_argument('category', required=True)
 
@@ -50,7 +49,6 @@ class NotesListResourse(Resource):
         if not session.query(Category).get(args['category']):
             abort(404, message=f"Category not found")
         note = Note(
-            title=args['title'],
             text=args['text'],
             category=args['category'],
             authorid=g.current_user.id
@@ -85,7 +83,7 @@ class NotesListResourse(Resource):
             abort(404, message=f"Notes not found")
         return jsonify(
             {
-                'notes': [{'note': note_user[0].to_dict(only=('id', 'title', 'text', 'img_file', 'audio_file')),
+                'notes': [{'note': note_user[0].to_dict(only=('id', 'text', 'img_file', 'audio_file')),
                            'author': note_user[1].to_dict(only=('nickname', 'id'))} for note_user in notes]
             }
         )

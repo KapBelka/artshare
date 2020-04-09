@@ -13,6 +13,7 @@ from wtforms.fields.html5 import EmailField
 from wtforms.validators import DataRequired
 import token_resource
 import requests
+import random
 
 app = Flask(__name__)
 api = Api(app)
@@ -29,7 +30,6 @@ class LoginForm(FlaskForm):
 
 
 class NoteForm(FlaskForm):
-    title = StringField('Название', validators=[DataRequired()])
     text = TextField('Текст', validators=[DataRequired()])
     category = SelectField('Категория', coerce=int)
     img_file = FileField('Изображение', validators=[FileAllowed(['jpg', 'png'])])
@@ -50,9 +50,18 @@ def validate_token(token):
     return False
 
 
+@app.after_request
+def off_cache(res):
+    res.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    res.headers["Pragma"] = "no-cache"
+    res.headers["Expires"] = "0"
+    res.headers['Cache-Control'] = 'public, max-age=0'
+    return res
+
+
 @app.route("/")
 def redirect_to_startpage():
-    return redirect("/index")
+    return redirect('/index')
 
 
 @app.route("/index")
@@ -73,13 +82,14 @@ def startpage():
 @app.route("/subscribes")
 def subscribespage():
     token = get_token()
-    is_token_valid = validate_token(get_token())
-    if not is_token_valid:
+    user = validate_token(get_token())
+    if not user:
         return redirect('/')
     subscribe_users = requests.get(f'{API_SERVER}/api/users/subscribe', headers={'Authorization': f'Bearer {token}'}).json()
     param = {'title': 'ArtShare',
-             'is_auth': is_token_valid,
-             'subscribe_users': subscribe_users['users']}
+             'is_auth': True,
+             'subscribe_users': subscribe_users['users'],
+             'user': user['user']}
     return render_template('subscribes.html', **param)
 
 
@@ -93,28 +103,30 @@ def subscribe(user_id):
     return redirect('/')
 
 
-@app.route("/subscribe/<int:user_id>")
+@app.route("/unsubscribe/<int:user_id>")
 def unsubscribe(user_id):
     token = get_token()
     is_token_valid = validate_token(get_token())
     if not is_token_valid:
-        return redirect('/')
+        return redirect('/subscribes')
     requests.delete(f'{API_SERVER}/api/users/subscribe/{user_id}', headers={'Authorization': f'Bearer {token}'}).json()
-    return redirect('/')
+    return redirect('/subscribes')
 
 
 @app.route("/add_note", methods=['GET', 'POST'])
 def add_notepage():
     token = get_token()
-    is_token_valid = validate_token(get_token())
-    if not is_token_valid:
+    user = validate_token(get_token())
+    if not user:
         return redirect('/')
+    param = {'title': 'Создание записи',
+             'is_auth': True,
+             'user': user['user']}
     form = NoteForm()
     categories = requests.get(f'{API_SERVER}/api/notes/category').json()
     form.category.choices = [(category['id'], category['name']) for category in categories['categories']]
     if form.validate_on_submit():
         data = {
-            'title': form.title.data,
             'text': form.text.data,
             'category': form.category.data}
         files = {}
@@ -124,7 +136,36 @@ def add_notepage():
             files["audio_file"] = (form.data["audio_file"].filename, form.data["audio_file"].read(), form.data["audio_file"].content_type)
         requests.post(f'{API_SERVER}/api/notes', headers={'Authorization': f'Bearer {token}'}, data=data, files=files)
         return redirect('/')
-    return render_template('note.html', title='Создание записи', form=form)
+    return render_template('note.html', form=form, **param)
+
+
+@app.route("/edit_note/<int:note_id>", methods=['GET', 'POST'])
+def edit_note(note_id):
+    token = get_token()
+    user = validate_token(get_token())
+    if not user:
+        return redirect('/')
+    param = {'title': 'Создание записи',
+             'is_auth': True,
+             'user': user['user']}
+    form = NoteForm()
+    note = requests.get(f'{API_SERVER}/api/notes/{note_id}').json()
+    categories = requests.get(f'{API_SERVER}/api/notes/category').json()
+    form.category.choices = [(category['id'], category['name']) for category in categories['categories']]
+    if form.validate_on_submit():
+        data = {
+            'text': form.text.data,
+            'category': form.category.data}
+        files = {}
+        if form.data["img_file"]:
+            files["img_file"] = (form.data["img_file"].filename, form.data["img_file"].read(), form.data["img_file"].content_type)
+        if form.data["audio_file"]:
+            files["audio_file"] = (form.data["audio_file"].filename, form.data["audio_file"].read(), form.data["audio_file"].content_type)
+        requests.put(f'{API_SERVER}/api/notes/{note_id}', headers={'Authorization': f'Bearer {token}'}, data=data, files=files)
+        return redirect('/')
+    form.text.data = note['text']
+    form.category.data = note['category']
+    return render_template('note.html', form=form, **param)
 
 
 @app.route("/delete_note/<int:note_id>")
@@ -132,7 +173,7 @@ def delete_notepage(note_id):
     token = get_token()
     is_token_valid = validate_token(get_token())
     if is_token_valid:
-        print(requests.delete(f'{API_SERVER}/api/notes/{note_id}', headers={'Authorization': f'Bearer {token}'}))
+        requests.delete(f'{API_SERVER}/api/notes/{note_id}', headers={'Authorization': f'Bearer {token}'})
     return redirect('/')
     
 

@@ -15,9 +15,16 @@
                     {% endfor %}
                 </select>
             </li>
+            {% if is_auth %}
+            <a class="list-group-item btn btn-outline-success" href="/add_note">Добавить запись</a>
+            {% endif %}
         </ul>
     </div>
     <div id="notes-list" class="content-block">
     </div>
-    <script src="/static/js/notes.js"></script>
+    {{no_cache}}
+    <script src="//127.0.0.1:5000/static/js/notes.js"></script>
+    {% if is_auth %}
+    <script>remember_id({{ user['id'] }})</script>
+    {% endif %}
 {% endblock %}

@@ -11,7 +11,7 @@ class SubscribeResource(Resource):
         session = g.session
         user = g.current_user
         to_user = session.query(User).get(user_id)
-        if to_user:
+        if to_user and user.id != to_user.id:
             user.add_subscribe(user_id)
             session.commit()
             return jsonify({'success': 'OK'})
@@ -30,7 +30,7 @@ class SubscribeResource(Resource):
     
     def get(self, user_id):
         session = db_session.create_session()
-        user = session.query("User").get(user_id)
+        user = session.query(User).get(user_id)
         if user:
             users = session.query(User).filter(User.id.in_(user.subscribe_users[1:-1].split(':'))).order_by(User.id.desc()).all()
             return jsonify({"users": [usr.to_dict(only=('id', 'nickname')) for usr in users]})

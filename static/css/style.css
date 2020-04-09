@@ -14,6 +14,11 @@
 
 .text-right {
     text-align: right;
+    float: right;
+}
+
+.profile-menu {
+    margin-right: 80px;
 }
 
 
@@ -43,6 +48,7 @@
 
 .note {
     background: rgb(255, 255, 255);
+    overflow: hidden;
     padding: 6px;
     margin: 6px;
 }
