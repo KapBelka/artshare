@@ -29,8 +29,16 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Войти')
 
 
+class RegisterForm(FlaskForm):
+    email = EmailField('Email', validators=[DataRequired()])
+    password = PasswordField('Пароль', validators=[DataRequired()])
+    nickname = StringField('Никнейм', validators=[DataRequired()])
+    about = TextAreaField('О себе', validators=[DataRequired()])
+    submit = SubmitField('Создать')
+
+
 class NoteForm(FlaskForm):
-    text = TextField('Текст', validators=[DataRequired()])
+    text = TextAreaField('Текст', validators=[DataRequired()])
     category = SelectField('Категория', coerce=int)
     img_file = FileField('Изображение', validators=[FileAllowed(['jpg', 'png'])])
     audio_file = FileField('Аудиозапись', validators=[FileAllowed(['mp3'])])
@@ -176,6 +184,29 @@ def delete_notepage(note_id):
         requests.delete(f'{API_SERVER}/api/notes/{note_id}', headers={'Authorization': f'Bearer {token}'})
     return redirect('/')
     
+
+@app.route("/register", methods=['GET', 'POST'])
+def registerpage():
+    token = get_token()
+    user = validate_token(get_token())
+    if user:
+        return redirect('/')
+    param = {'title': 'Создание аккаунта',
+             'is_auth': False}
+    form = RegisterForm()
+    if form.validate_on_submit():
+        data = {
+            'email': form.email.data,
+            'nickname': form.nickname.data,
+            'password': form.password.data,
+            'about': form.about.data}
+        requests.post(f'{API_SERVER}/api/users', headers={'Authorization': f'Bearer {token}'}, data=data)
+        data = requests.get(f'{API_SERVER}/api/token', auth=(form.email.data, form.password.data)).json()
+        res = make_response(redirect("/"))
+        res.set_cookie("token", data['token'], max_age=60 * 60)
+        return res
+    return render_template('register.html', form=form, **param)
+
 
 @app.route("/login", methods=['GET', 'POST'])
 def loginpage():
