@@ -1,3 +1,4 @@
+var API_SERVER = 'https://belkaartshare.herokuapp.com'
 var count = 15
 var start_id = null
 var cateogry = null
@@ -27,10 +28,10 @@ function add_data(notes, subscribe_users) {
             div.className = "note rounded"
             html = "<h5 class='nickname'><a href='/profile/"+this_note.author.id+"'>"+this_note.author.nickname+"</a></h5>"+this_note.note.text+"<br>";
             if (this_note.note.img_file) {
-                html += "<img src='http://127.0.0.1:5000/static/img/notes/"+this_note.note.img_file+"' width='100%'>"
+                html += "<img src='/static/img/notes/"+this_note.note.img_file+"' width='100%'>"
             }
             if (this_note.note.audio_file) {
-                html += "<audio class='player' src='http://127.0.0.1:5000/static/audio/notes/"+this_note.note.audio_file+"' controls></audio>"
+                html += "<audio class='player' src='/static/audio/notes/"+this_note.note.audio_file+"' controls></audio>"
             }
             if (this_note.author.id == this_user_id) {
                 html += "<a class='text-right' href='/delete_note/"+this_note.note.id+"'><button type='button' class='btn btn-outline-danger'>Удалить</button></a>";
@@ -59,13 +60,13 @@ function update_data(){
     if (subscribe != null) {
         data += "&subscribe=" + subscribe
     }
-    xhr.open("GET", "http://127.0.0.1:5000/api/notes?" + data, true);
+    xhr.open("GET", API_SERVER + "/api/notes?" + data, true);
     xhr.onload = function (){
         var notes_list = document.getElementById("notes-list");
         notes_list.innerHTML = "";
         var notes = JSON.parse(xhr.responseText);
         if (this_user_id != null) {
-            xhr.open("GET", "http://127.0.0.1:5000/api/users/subscribe/" + this_user_id, true);
+            xhr.open("GET", API_SERVER + "/api/users/subscribe/" + this_user_id, true);
             xhr.onload = function() {
                 var subscribe_users = JSON.parse(xhr.responseText);
                 console.log(subscribe_users);
@@ -114,11 +115,11 @@ document.onscroll = function (event){
             if (subscribe != null) {
                 data += "&subscribe=" + subscribe
             }
-            xhr.open("GET", "http://127.0.0.1:5000/api/notes?" + data, true);
+            xhr.open("GET", API_SERVER + "/api/notes?" + data, true);
             xhr.onload = function (){
                 var notes = JSON.parse(xhr.responseText);
                 if (this_user_id != null) {
-                    xhr.open("GET", "http://127.0.0.1:5000/api/users/subscribe/" + this_user_id, true);
+                    xhr.open("GET", API_SERVER + "/api/users/subscribe/" + this_user_id, true);
                     xhr.onload = function() {
                         var subscribe_users = JSON.parse(xhr.responseText);
                         console.log(subscribe_users);
