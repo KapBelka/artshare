@@ -10,6 +10,7 @@ parser = reqparse.RequestParser()
 parser.add_argument('password')
 parser.add_argument('nickname')
 parser.add_argument('about')
+parser.add_argument('remove_img')
 
 
 class UsersResource(Resource):
@@ -35,6 +36,8 @@ class UsersResource(Resource):
             if 'img_file' in request.files:
                 img_file = request.files['img_file']
                 user.photo = create_img_file(img_file)
+            if args['remove_img']:
+                user.photo = "default.jpg"
             session.add(user)
             session.commit()
             return jsonify({'success': 'OK'})

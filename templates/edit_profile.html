@@ -39,6 +39,7 @@
                 </div>
             {% endfor %}
         </p>
+        <p>{{ form.remove_img() }} {{ form.remove_img.label }}</p>
         <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
         <div>{{ message }}</div>
     </form>

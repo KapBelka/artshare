@@ -43,6 +43,7 @@ class EditProfileForm(FlaskForm):
     nickname = StringField('Никнейм', validators=[DataRequired()])
     about = TextAreaField('О себе', validators=[DataRequired()])
     photo = FileField('Фотография', validators=[FileAllowed(['jpg', 'png'])])
+    remove_img = BooleanField('Убрать изоображение')
     submit = SubmitField('Изменить')
 
 
@@ -144,7 +145,8 @@ def edit_profile():
     if form.validate_on_submit():
         data = {
             'nickname': form.nickname.data,
-            'about': form.about.data}
+            'about': form.about.data,
+            'remove_img': form.remove_img.data}
         if form.password.data:
             data['password'] = form.password.data
         files = {}
@@ -261,13 +263,16 @@ def registerpage():
             'password': form.password.data,
             'about': form.about.data}
         files = {}
-        if form.data["img_file"]:
+        if form.data["photo"]:
             files["img_file"] = (form.data["photo"].filename, form.data["photo"].read(), form.data["photo"].content_type)
-        requests.post(f'{API_SERVER}/api/users', headers={'Authorization': f'Bearer {token}'}, data=data, files=files)
-        data = requests.get(f'{API_SERVER}/api/token', auth=(form.email.data, form.password.data)).json()
-        res = make_response(redirect("/"))
-        res.set_cookie("token", data['token'], max_age=60 * 60)
-        return res
+        response = requests.post(f'{API_SERVER}/api/users', headers={'Authorization': f'Bearer {token}'}, data=data, files=files)
+        if response:
+            data = requests.get(f'{API_SERVER}/api/token', auth=(form.email.data, form.password.data)).json()
+            res = make_response(redirect("/"))
+            res.set_cookie("token", data['token'], max_age=60 * 60)
+            return res
+        else:
+            return render_template('register.html', form=form, message="Email занят", **param)
     return render_template('register.html', form=form, **param)
 
 
