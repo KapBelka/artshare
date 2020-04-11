@@ -29,12 +29,13 @@
                 </li>
                 {% else %}
                 <li class="dropdown profile-menu">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         {{ user['nickname'] }}
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                         <a class="dropdown-item" type="button" href="/profile/{{ user['id'] }}">Профиль</a>
                         <a class="dropdown-item" type="button" href="/edit_profile">Редактировать</a>
+                        <a class="dropdown-item" type="button" href="/subscribes">Мои подписки</a>
                         <a class="dropdown-item" type="button" href="/logout">Выйти</a>
                     </div>
                 </li>

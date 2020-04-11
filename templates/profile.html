@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <div class="content-block">
+        <div id="profile" class="note rounded">
+            <img class="text-left figure-img img-fluid rounded border border-info margin-10" src="/static/img/profiles/{{user_profile['photo']}}" width="200px">
+            <h5 class='nickname'>{{user_profile['nickname']}}</h5>
+            {{user_profile['about']}}
+        </div>
+        <div id="notes-list">
+            {% for note in notes %}
+            <div class="note rounded">
+                <h5 class='nickname'><a href="/profile/{{note['author']['id']}}">{{note['author']['nickname']}}</a></h5>
+                {{note['note']['text']}}<br>
+                {% if note['note']['img_file'] %}
+                    <img class='rounded' src="/static/img/notes/{{note['note']['img_file']}}" width='100%'>
+                {% endif %}
+                {% if note['note']['audio_file'] %}
+                    <audio class='player' src="/static/audio/notes/{{note['note']['audio_file']}}" controls></audio>
+                {% endif %}
+                {% if is_auth and note['author']['id'] == user['id'] %}
+                    <a class='text-right' href="/delete_note/{{note['note']['id']}}"><button type='button' class='btn btn-outline-danger'>Удалить</button></a>
+                    <a class='text-right' href="/edit_note/{{note['note']['id']}}"><button type='button' class='btn btn-outline-secondary'>Изменить</button></a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

@@ -5,11 +5,8 @@
     <div class='content-block'>
         {% for user in subscribe_users %}
         <div class='note rounded'>
-            <p class='inline'>
-            {{user['nickname']}}</p>
-            <p class='text-right'><a href='/unsubscribe/{{user["id"]}}'><button type='button' class='btn btn-info'>Отписаться</button></a></p>
-            <p style="clear:both;"></p>
-            <p class='nickname'>
+            <h4 class='inline'>{{user['nickname']}}</h4>
+            <a class='text-right' href='/unsubscribe/{{user["id"]}}'><button type='button' class='btn btn-outline-danger'>Отписаться</button></a>
         </div>
         {% endfor %}
     </div>

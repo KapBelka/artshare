@@ -34,14 +34,25 @@ class RegisterForm(FlaskForm):
     password = PasswordField('Пароль', validators=[DataRequired()])
     nickname = StringField('Никнейм', validators=[DataRequired()])
     about = TextAreaField('О себе', validators=[DataRequired()])
+    photo = FileField('Фотография', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Создать')
+
+
+class EditProfileForm(FlaskForm):
+    password = PasswordField('Пароль')
+    nickname = StringField('Никнейм', validators=[DataRequired()])
+    about = TextAreaField('О себе', validators=[DataRequired()])
+    photo = FileField('Фотография', validators=[FileAllowed(['jpg', 'png'])])
+    submit = SubmitField('Изменить')
 
 
 class NoteForm(FlaskForm):
     text = TextAreaField('Текст', validators=[DataRequired()])
     category = SelectField('Категория', coerce=int)
     img_file = FileField('Изображение', validators=[FileAllowed(['jpg', 'png'])])
+    remove_img = BooleanField('Убрать изоображение')
     audio_file = FileField('Аудиозапись', validators=[FileAllowed(['mp3'])])
+    remove_audio = BooleanField('Убрать аудиозапись')
     submit = SubmitField('Закончить')
 
 
@@ -101,6 +112,51 @@ def subscribespage():
     return render_template('subscribes.html', **param)
 
 
+
+@app.route("/profile/<int:user_id>")
+def profilepage(user_id):
+    user_profile = requests.get(f'{API_SERVER}/api/users/{user_id}').json()
+    if not user_profile:
+        redirect('/')
+    notes = requests.get(f'{API_SERVER}/api/notes', data={'authorid': user_id}).json()
+    param = {'title': 'ArtShare',
+             'is_auth': False,
+             'user_profile': user_profile,
+             'notes': notes['notes']}
+    token = get_token()
+    user = validate_token(get_token())
+    if user:
+        param['is_auth'] = True
+        param['user'] = user['user']
+    return render_template('profile.html', **param)
+
+
+@app.route("/edit_profile", methods=['GET', 'POST'])
+def edit_profile():
+    token = get_token()
+    user = validate_token(get_token())
+    if not user:
+        return redirect('/')
+    param = {'title': 'Изменение аккаунта',
+             'is_auth': True,
+             'user': user['user']}
+    form = EditProfileForm()
+    if form.validate_on_submit():
+        data = {
+            'nickname': form.nickname.data,
+            'about': form.about.data}
+        if form.password.data:
+            data['password'] = form.password.data
+        files = {}
+        if form.data["photo"]:
+            files["img_file"] = (form.data["photo"].filename, form.data["photo"].read(), form.data["photo"].content_type)
+        print(requests.put(f"{API_SERVER}/api/users/{user['user']['id']}", headers={'Authorization': f'Bearer {token}'}, data=data, files=files).json())
+        return redirect("/")
+    form.nickname.data = user['user']['nickname']
+    form.about.data = user['user']['about']
+    return render_template('edit_profile.html', form=form, **param)
+
+
 @app.route("/subscribe/<int:user_id>")
 def subscribe(user_id):
     token = get_token()
@@ -136,7 +192,9 @@ def add_notepage():
     if form.validate_on_submit():
         data = {
             'text': form.text.data,
-            'category': form.category.data}
+            'category': form.category.data,
+            'remove_img': form.remove_img.data,
+            'remove_audio': form.remove_audio.data}
         files = {}
         if form.data["img_file"]:
             files["img_file"] = (form.data["img_file"].filename, form.data["img_file"].read(), form.data["img_file"].content_type)
@@ -153,7 +211,7 @@ def edit_note(note_id):
     user = validate_token(get_token())
     if not user:
         return redirect('/')
-    param = {'title': 'Создание записи',
+    param = {'title': 'Изменение записи',
              'is_auth': True,
              'user': user['user']}
     form = NoteForm()
@@ -163,7 +221,9 @@ def edit_note(note_id):
     if form.validate_on_submit():
         data = {
             'text': form.text.data,
-            'category': form.category.data}
+            'category': form.category.data,
+            'remove_img': form.remove_img.data,
+            'remove_audio': form.remove_audio.data}
         files = {}
         if form.data["img_file"]:
             files["img_file"] = (form.data["img_file"].filename, form.data["img_file"].read(), form.data["img_file"].content_type)
@@ -200,7 +260,10 @@ def registerpage():
             'nickname': form.nickname.data,
             'password': form.password.data,
             'about': form.about.data}
-        requests.post(f'{API_SERVER}/api/users', headers={'Authorization': f'Bearer {token}'}, data=data)
+        files = {}
+        if form.data["img_file"]:
+            files["img_file"] = (form.data["photo"].filename, form.data["photo"].read(), form.data["photo"].content_type)
+        requests.post(f'{API_SERVER}/api/users', headers={'Authorization': f'Bearer {token}'}, data=data, files=files)
         data = requests.get(f'{API_SERVER}/api/token', auth=(form.email.data, form.password.data)).json()
         res = make_response(redirect("/"))
         res.set_cookie("token", data['token'], max_age=60 * 60)

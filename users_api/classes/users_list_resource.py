@@ -1,8 +1,10 @@
-from flask_restful import reqparse, Resource, abort
+from flask_restful import reqparse, Resource, abort, request
 from flask import jsonify, g
 from data.users import User
 from data import db_session
 from api_auth import auth, token_auth
+from files import *
+import uuid
 
 
 parser = reqparse.RequestParser()
@@ -24,6 +26,9 @@ class UsersListResource(Resource):
             nickname=args['nickname'],
             about=args['about'],
         )
+        if 'img_file' in request.files:
+            img_file = request.files['img_file']
+            user.photo = create_img_file(img_file)
         user.set_password(args['password'])
         session.add(user)
         session.commit()

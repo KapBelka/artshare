@@ -15,3 +15,4 @@ users_api/classes/__pycache__/subscribe_resource.cpython-37.pyc
 users_api/classes/__pycache__/subscript_list_resource.cpython-37.pyc
 users_api/classes/__pycache__/subscript_resource.cpython-37.pyc
 notes_api/classes/__pycache__/categories_list_resource.cpython-37.pyc
+__pycache__/files.cpython-37.pyc

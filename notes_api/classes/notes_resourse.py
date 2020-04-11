@@ -4,11 +4,13 @@ from flask import jsonify, g
 from data.notes import Note
 from data import db_session
 from api_auth import token_auth
-from notes_api.classes.notes_list_resourse import create_audio_file, create_img_file
+from files import *
 
 parser = reqparse.RequestParser()
 parser.add_argument('text')
 parser.add_argument('category')
+parser.add_argument('remove_img')
+parser.add_argument('remove_audio')
 
 
 class NotesResourse(Resource):
@@ -27,9 +29,9 @@ class NotesResourse(Resource):
         if note.authorid == user.id:
             args = parser.parse_args()
             print(args)
-            if 'text' in args:
+            if args['text']:
                 note.text = args['text']
-            if 'category' in args:
+            if args['category']:
                 if not session.query(Category).get(args['category']):
                     abort(404, message=f"Category not found")
                 note.category = args['category']
@@ -39,6 +41,10 @@ class NotesResourse(Resource):
             if 'audio_file' in request.files:
                 audio_file = request.files['audio_file']
                 note.audio_file = create_audio_file(audio_file)
+            if args['remove_img']:
+                note.img_file = None
+            if args['remove_audio']:
+                note.audio_file = None
             session.add(note)
             session.commit()
             return jsonify({'success': 'OK'})

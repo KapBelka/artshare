@@ -25,7 +25,7 @@ function add_data(notes, subscribe_users) {
             this_note = notes.notes[i];
             var div = document.createElement("div");
             div.className = "note rounded"
-            html = "<h5 class='nickname'>"+this_note.author.nickname+"</h5>"+this_note.note.text+"<br>";
+            html = "<h5 class='nickname'><a href='/profile/"+this_note.author.id+"'>"+this_note.author.nickname+"</a></h5>"+this_note.note.text+"<br>";
             if (this_note.note.img_file) {
                 html += "<img src='http://127.0.0.1:5000/static/img/notes/"+this_note.note.img_file+"' width='100%'>"
             }
@@ -108,7 +108,7 @@ document.onscroll = function (event){
     if (scrollHeight - window.pageYOffset <= 660) {
         if (start_id > 0) {
             data = "start_id=" + start_id + "&count=" + count;
-            if (category != null) {
+            if (category != "null") {
                 data += "&category=" + category;
             }
             if (subscribe != null) {

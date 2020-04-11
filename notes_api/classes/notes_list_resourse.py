@@ -6,39 +6,22 @@ from api_auth import token_auth
 from data.notes import Note
 from data.users import User
 from data import db_session
+from files import *
 import uuid
 
 
 parser = reqparse.RequestParser()
 parser.add_argument('text', required=True)
 parser.add_argument('category', required=True)
+parser.add_argument('remove_img')
+parser.add_argument('remove_audio')
 
 parser_for_get = reqparse.RequestParser()
 parser_for_get.add_argument('start_id', type=int)
-parser_for_get.add_argument('count', type=int, default=15)
+parser_for_get.add_argument('count', type=int)
 parser_for_get.add_argument('category', type=int)
 parser_for_get.add_argument('subscribe', type=int)
-
-
-def create_img_file(img_file):
-    if img_file.filename.endswith('.jpg'):
-        img_file_name = f"{uuid.uuid4()}.jpg"
-        img_file.save(f"static/img/notes/{img_file_name}")
-    elif img_file.filename.endswith('.png'):
-        img_file_name = f"{uuid.uuid4()}.png"
-        img_file.save(f"static/img/notes/{img_file_name}")
-    else:
-        abort(400, message=f"File type {img_file.filename} not allowed")
-    return img_file_name
-
-
-def create_audio_file(audio_file):
-    if audio_file.filename.endswith('.mp3'):
-        audio_file_name = f"{uuid.uuid4()}.mp3"
-        audio_file.save(f"static/audio/notes/{audio_file_name}")
-    else:
-        abort(400, message=f"File type {audio_file.filename} not allowed")
-    return audio_file_name
+parser_for_get.add_argument('authorid', type=int)
 
 
 class NotesListResourse(Resource):
@@ -59,6 +42,10 @@ class NotesListResourse(Resource):
         if 'audio_file' in request.files:
             audio_file = request.files['audio_file']
             note.audio_file = create_audio_file(audio_file)
+        if args['remove_img']:
+            note.img_file = None
+        if args['remove_audio']:
+            note.audio_file = None
         session.add(note)
         session.commit()
         return jsonify({'success': 'OK'})
@@ -70,17 +57,23 @@ class NotesListResourse(Resource):
         category = args['category']
         subscribe = args['subscribe']
         count = args['count']
+        authorid = args['authorid']
         if not start_id:
             start_id = session.query(Note).order_by(Note.id.desc()).first().id
         query = session.query(Note, User).filter(Note.id <= start_id, User.id == Note.authorid)
+        if authorid:
+            query = query.filter(Note.authorid == authorid)
         if category:
             query = query.filter(Note.category == category)
         if subscribe:
             user = session.query(User).get(subscribe)
             query = query.filter(Note.authorid.in_(user.subscribe_users[1:-1].split(':')))
-        notes = query.order_by(Note.date.desc()).limit(count).all()
+        query = query.order_by(Note.date.desc())
+        if count:
+            query = query.limit(count)
+        notes = query.all()
         if not notes:
-            abort(404, message=f"Notes not found")
+            jsonify({'notes': []})
         return jsonify(
             {
                 'notes': [{'note': note_user[0].to_dict(only=('id', 'text', 'img_file', 'audio_file')),
