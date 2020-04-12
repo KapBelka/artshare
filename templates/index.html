@@ -22,8 +22,8 @@
     </div>
     <div id="notes-list" class="content-block">
     </div>
-    <script src="//127.0.0.1:5000/static/js/notes.js"></script>
+    <script type="text/javascript" src="/static/js/notes.js"></script>
     {% if is_auth %}
-    <script>remember_id({{ user['id'] }})</script>
+    <script type="text/javascript">remember_id({{ user['id'] }})</script>
     {% endif %}
 {% endblock %}

@@ -1,4 +1,4 @@
-var API_SERVER = 'http://127.0.0.1:5000'
+var API_SERVER = document.location.protocol + '//' + document.location.host
 var count = 15
 var start_id = null
 var cateogry = null

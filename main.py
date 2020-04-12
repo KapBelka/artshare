@@ -72,6 +72,7 @@ def validate_token(token):
 
 @app.after_request
 def off_cache(res):
+    res.headers['Access-Control-Allow-Origin'] = '*'
     res.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     res.headers["Pragma"] = "no-cache"
     res.headers["Expires"] = "0"

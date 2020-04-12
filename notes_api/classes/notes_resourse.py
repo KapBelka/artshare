@@ -37,14 +37,15 @@ class NotesResourse(Resource):
                 note.category = args['category']
             if 'img_file' in request.files:
                 img_file = request.files['img_file']
-                note.img_file = create_img_file(img_file)
+                note.img_file = create_img_file(img_file, 'notes')
             if 'audio_file' in request.files:
                 audio_file = request.files['audio_file']
-                note.audio_file = create_audio_file(audio_file)
-            if args['remove_img']:
+                note.audio_file = create_audio_file(audio_file, 'notes')
+            if args['remove_img'] == 'True':
                 note.img_file = None
-            if args['remove_audio']:
+            if args['remove_audio'] == 'True':
                 note.audio_file = None
+            print(note.img_file)
             session.add(note)
             session.commit()
             return jsonify({'success': 'OK'})

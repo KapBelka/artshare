@@ -35,8 +35,8 @@ class UsersResource(Resource):
                 user.set_password(args['password'])
             if 'img_file' in request.files:
                 img_file = request.files['img_file']
-                user.photo = create_img_file(img_file)
-            if args['remove_img']:
+                user.photo = create_img_file(img_file, 'profiles')
+            if args['remove_img'] == 'True':
                 user.photo = "default.jpg"
             session.add(user)
             session.commit()
