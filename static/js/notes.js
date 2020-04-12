@@ -1,4 +1,4 @@
-var API_SERVER = 'https://belkaartshare.herokuapp.com'
+var API_SERVER = 'http://127.0.0.1:5000'
 var count = 15
 var start_id = null
 var cateogry = null

@@ -20,7 +20,7 @@ api = Api(app)
 app.config['SECRET_KEY'] = 'artshare_key_2013381'
 
 
-API_SERVER = 'https://belkaartshare.herokuapp.com'
+API_SERVER = 'http://127.0.0.1:5000'
 
 
 class LoginForm(FlaskForm):
