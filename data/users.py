@@ -19,7 +19,7 @@ class User(SqlAlchemyBase, SerializerMixin, UserMixin):
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     nickname = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     about = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    photo = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    photo = sqlalchemy.Column(sqlalchemy.String, nullable=True, default='default.jpg')
     subscribe_users = sqlalchemy.Column(sqlalchemy.String, nullable=True, default='')
     notes = orm.relation("Note", back_populates='user')
 

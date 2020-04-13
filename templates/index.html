@@ -4,12 +4,15 @@
 {% block content %}
     <div class="right-block rounded">
         <ul class="list-group">
+            <li class="list-group-item">
+                <input type="text" id="search_input" class="player">
+            </li>
             <li class="list-group-item btn btn-outline-secondary" onclick="show_all()">Лента</li>
             {% if is_auth %}
             <li class="list-group-item btn btn-outline-secondary" onclick="show_subscribe({{ user['id'] }})">Подписки</li>
             {% endif %}
             <li class="list-group-item">
-                <select id="category" onchange="update_data()" class="custom-select">
+                <select id="category" onchange="update_data(true)" class="custom-select">
                     {% for elem in categories %}
                         <option value="{{elem['id']}}">{{elem['name']}}</option>
                     {% endfor %}

@@ -5,7 +5,7 @@
     <div class='content-block'>
         {% for user in subscribe_users %}
         <div class='note rounded'>
-            <h4 class='inline'>{{user['nickname']}}</h4>
+            <a href='/profile/{{user["id"]}}'><h4 class='inline'>{{user['nickname']}}</h4></a>
             <a class='text-right' href='/unsubscribe/{{user["id"]}}'><button type='button' class='btn btn-outline-danger'>Отписаться</button></a>
         </div>
         {% endfor %}

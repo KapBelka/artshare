@@ -11,7 +11,7 @@ import uuid
 
 
 parser = reqparse.RequestParser()
-parser.add_argument('text', required=True)
+parser.add_argument('text')
 parser.add_argument('category', required=True)
 parser.add_argument('remove_img')
 parser.add_argument('remove_audio')
@@ -22,6 +22,7 @@ parser_for_get.add_argument('count', type=int)
 parser_for_get.add_argument('category', type=int)
 parser_for_get.add_argument('subscribe', type=int)
 parser_for_get.add_argument('authorid', type=int)
+parser_for_get.add_argument('search')
 
 
 class NotesListResourse(Resource):
@@ -38,13 +39,13 @@ class NotesListResourse(Resource):
         )
         if 'img_file' in request.files:
             img_file = request.files['img_file']
-            note.img_file = create_img_file(img_file)
+            note.img_file = create_img_file(img_file, "notes")
         if 'audio_file' in request.files:
             audio_file = request.files['audio_file']
-            note.audio_file = create_audio_file(audio_file)
-        if args['remove_img']:
+            note.audio_file = create_audio_file(audio_file, "notes")
+        if args['remove_img'] == 'True':
             note.img_file = None
-        if args['remove_audio']:
+        if args['remove_audio'] == 'True':
             note.audio_file = None
         session.add(note)
         session.commit()
@@ -56,11 +57,14 @@ class NotesListResourse(Resource):
         start_id = args['start_id']
         category = args['category']
         subscribe = args['subscribe']
+        search = args['search']
         count = args['count']
         authorid = args['authorid']
-        if not start_id:
-            start_id = session.query(Note).order_by(Note.id.desc()).first().id
-        query = session.query(Note, User).filter(Note.id <= start_id, User.id == Note.authorid)
+        query = session.query(Note, User).filter(User.id == Note.authorid)
+        if start_id:
+            query = query.filter(Note.id <= start_id)
+        if search:
+            query = query.filter(Note.text.like(f'%{search}%') | User.nickname.like(f'%{search}%'))
         if authorid:
             query = query.filter(Note.authorid == authorid)
         if category:
@@ -72,8 +76,9 @@ class NotesListResourse(Resource):
         if count:
             query = query.limit(count)
         notes = query.all()
+        print('asd', notes)
         if not notes:
-            jsonify({'notes': []})
+            return jsonify({'notes': []})
         return jsonify(
             {
                 'notes': [{'note': note_user[0].to_dict(only=('id', 'text', 'img_file', 'audio_file')),

@@ -33,7 +33,7 @@ class RegisterForm(FlaskForm):
     email = EmailField('Email', validators=[DataRequired()])
     password = PasswordField('Пароль', validators=[DataRequired()])
     nickname = StringField('Никнейм', validators=[DataRequired()])
-    about = TextAreaField('О себе', validators=[DataRequired()])
+    about = TextAreaField('О себе')
     photo = FileField('Фотография', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Создать')
 
@@ -41,14 +41,14 @@ class RegisterForm(FlaskForm):
 class EditProfileForm(FlaskForm):
     password = PasswordField('Пароль')
     nickname = StringField('Никнейм', validators=[DataRequired()])
-    about = TextAreaField('О себе', validators=[DataRequired()])
+    about = TextAreaField('О себе')
     photo = FileField('Фотография', validators=[FileAllowed(['jpg', 'png'])])
     remove_img = BooleanField('Убрать изоображение')
     submit = SubmitField('Изменить')
 
 
 class NoteForm(FlaskForm):
-    text = TextAreaField('Текст', validators=[DataRequired()])
+    text = TextAreaField('Текст')
     category = SelectField('Категория', coerce=int)
     img_file = FileField('Изображение', validators=[FileAllowed(['jpg', 'png'])])
     remove_img = BooleanField('Убрать изоображение')
@@ -121,6 +121,7 @@ def profilepage(user_id):
     if not user_profile:
         redirect('/')
     notes = requests.get(f'{API_SERVER}/api/notes', data={'authorid': user_id}).json()
+    print(notes)
     param = {'title': 'ArtShare',
              'is_auth': False,
              'user_profile': user_profile,

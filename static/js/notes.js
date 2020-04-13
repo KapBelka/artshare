@@ -1,5 +1,7 @@
-var API_SERVER = document.location.protocol + '//' + document.location.host
-var count = 15
+const API_SERVER = document.location.protocol + '//' + document.location.host
+var count = 10
+var search = null
+var last_start_id = null
 var start_id = null
 var cateogry = null
 var subscribe = null
@@ -19,7 +21,8 @@ function containsObject(obj, list) {
 
 
 function add_data(notes, subscribe_users) {
-    if (!("message" in notes)) {
+    if (!("message" in notes) && notes.notes.length) {
+        last_start_id = start_id
         start_id = notes.notes[notes.notes.length - 1].note.id - 1;
         var notes_list = document.getElementById("notes-list");
         for (let i = 0; i < notes.notes.length; i++) {
@@ -46,9 +49,11 @@ function add_data(notes, subscribe_users) {
 };
 
 
-function update_data(){
-    var category_select = document.getElementById("category")
-    start_id = null;
+function update_data(is_new){
+    var category_select = document.getElementById("category");
+    if (is_new) {
+        start_id = null;
+    }
     category = category_select.value;
     data = "count=" + count;
     if (category != "null") {
@@ -60,16 +65,20 @@ function update_data(){
     if (subscribe != null) {
         data += "&subscribe=" + subscribe
     }
+    if (search != null) {
+        data += "&search=" + search
+    }
     xhr.open("GET", API_SERVER + "/api/notes?" + data, true);
     xhr.onload = function (){
         var notes_list = document.getElementById("notes-list");
-        notes_list.innerHTML = "";
+        if (is_new) {
+            notes_list.innerHTML = "";
+        }
         var notes = JSON.parse(xhr.responseText);
         if (this_user_id != null) {
             xhr.open("GET", API_SERVER + "/api/users/subscribe/" + this_user_id, true);
             xhr.onload = function() {
                 var subscribe_users = JSON.parse(xhr.responseText);
-                console.log(subscribe_users);
                 add_data(notes, subscribe_users);
             }
             xhr.send();
@@ -83,19 +92,35 @@ function update_data(){
 
 function show_all() {
     subscribe = null;
-    update_data()
+    search = null
+    update_data(true)
 }
 
 
 function show_subscribe(user_id) {
     subscribe = user_id;
-    update_data()
+    update_data(true)
 }
 
 
 function remember_id(user_id) {
     this_user_id = user_id;
 }
+
+
+const search_input = document.getElementById("search_input");
+search_input.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        if (search_input.value != '') {
+            search = search_input.value;
+        }
+        else {
+            search = null
+        }
+        update_data(true)
+    }
+});
 
 
 update_data();
@@ -107,30 +132,8 @@ document.onscroll = function (event){
         document.body.offsetHeight, document.documentElement.offsetHeight,
         document.body.clientHeight, document.documentElement.clientHeight);
     if (scrollHeight - window.pageYOffset <= 660) {
-        if (start_id > 0) {
-            data = "start_id=" + start_id + "&count=" + count;
-            if (category != "null") {
-                data += "&category=" + category;
-            }
-            if (subscribe != null) {
-                data += "&subscribe=" + subscribe
-            }
-            xhr.open("GET", API_SERVER + "/api/notes?" + data, true);
-            xhr.onload = function (){
-                var notes = JSON.parse(xhr.responseText);
-                if (this_user_id != null) {
-                    xhr.open("GET", API_SERVER + "/api/users/subscribe/" + this_user_id, true);
-                    xhr.onload = function() {
-                        var subscribe_users = JSON.parse(xhr.responseText);
-                        console.log(subscribe_users);
-                        add_data(notes, subscribe_users);
-                    }
-                    xhr.send();
-                } else {
-                    add_data(notes, null);
-                }
-            };
-            xhr.send();
+        if (start_id > 0 && start_id != last_start_id) {
+            update_data(false);
         }
     }
 };

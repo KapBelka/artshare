@@ -55,6 +55,7 @@
 .note {
     background: rgb(255, 255, 255);
     overflow: hidden;
+	width: 530px;
     padding: 6px;
     margin: 6px;
 }

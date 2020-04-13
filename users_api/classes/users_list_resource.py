@@ -28,7 +28,7 @@ class UsersListResource(Resource):
         )
         if 'img_file' in request.files:
             img_file = request.files['img_file']
-            user.photo = create_img_file(img_file)
+            user.photo = create_img_file(img_file, "profiles")
         user.set_password(args['password'])
         session.add(user)
         session.commit()
