@@ -1,12 +1,13 @@
 from data import db_session
 from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 from flask_restful import abort
-from flask import jsonify, g
+from flask import g
 from data.users import User
 import datetime
 
-
 auth = HTTPBasicAuth()
+
+
 @auth.verify_password  # подключаем проверку пароля flask-httpauth
 def verify_password(email, password):
     """Сверяет email и пароль с базой данных"""
@@ -20,6 +21,8 @@ def verify_password(email, password):
 
 
 token_auth = HTTPTokenAuth()
+
+
 @token_auth.verify_token
 def verify_token(token):
     """Сверяет token с базой данных"""

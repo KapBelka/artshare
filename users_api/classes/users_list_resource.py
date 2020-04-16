@@ -1,11 +1,8 @@
 from flask_restful import reqparse, Resource, abort, request
-from flask import jsonify, g
+from flask import jsonify
 from data.users import User
 from data import db_session
-from api_auth import auth, token_auth
 from files import *
-import uuid
-
 
 parser = reqparse.RequestParser()
 parser.add_argument('email', required=True)

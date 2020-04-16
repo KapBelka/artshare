@@ -1,9 +1,7 @@
-from flask_restful import reqparse, Resource, abort, request
+from flask_restful import reqparse, Resource
 from data.categories import Category
-from flask import jsonify, g
-from sqlalchemy import desc
+from flask import jsonify
 from data import db_session
-
 
 parser = reqparse.RequestParser()
 parser.add_argument('name', required=True)

@@ -1,6 +1,5 @@
-from flask_restful import reqparse, Resource, abort
+from flask_restful import Resource
 from flask import jsonify, g
-from data import db_session
 from api_auth import auth, token_auth
 import datetime
 import base64
@@ -27,9 +26,11 @@ class TokenResource(Resource):
             session.add(user)
             session.commit()
         return jsonify({'token': token})
+
     @token_auth.login_required
     def post(self):
         return jsonify({'user': g.current_user.to_dict(only=('id', 'nickname', 'about', 'email'))})
+
     @token_auth.login_required
     def delete(self):
         g.current_user.token_exp = datetime.datetime.utcnow() - datetime.timedelta(seconds=1)

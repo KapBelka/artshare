@@ -1,9 +1,8 @@
 from flask import Flask, redirect, render_template, request, make_response
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileRequired, FileAllowed
+from flask_wtf.file import FileAllowed
 from data import db_session
-from flask_restful import abort, Api
-from data.users import User
+from flask_restful import Api
 from users_api.classes import users_list_resource, users_resource
 from users_api.classes import subscribe_resource, subscribe_list_resource
 from notes_api.classes import notes_list_resourse, notes_resourse
@@ -13,12 +12,10 @@ from wtforms.fields.html5 import EmailField
 from wtforms.validators import DataRequired
 import token_resource
 import requests
-import random
 
 app = Flask(__name__)
 api = Api(app)
 app.config['SECRET_KEY'] = 'artshare_key_2013381'
-
 
 API_SERVER = 'http://127.0.0.1:5000'
 
@@ -106,13 +103,13 @@ def subscribespage():
     user = validate_token(get_token())
     if not user:
         return redirect('/')
-    subscribe_users = requests.get(f'{API_SERVER}/api/users/subscribe', headers={'Authorization': f'Bearer {token}'}).json()
+    subscribe_users = requests.get(f'{API_SERVER}/api/users/subscribe',
+                                   headers={'Authorization': f'Bearer {token}'}).json()
     param = {'title': 'ArtShare',
              'is_auth': True,
              'subscribe_users': subscribe_users['users'],
              'user': user['user']}
     return render_template('subscribes.html', **param)
-
 
 
 @app.route("/profile/<int:user_id>")
@@ -153,8 +150,10 @@ def edit_profile():
             data['password'] = form.password.data
         files = {}
         if form.data["photo"]:
-            files["img_file"] = (form.data["photo"].filename, form.data["photo"].read(), form.data["photo"].content_type)
-        print(requests.put(f"{API_SERVER}/api/users/{user['user']['id']}", headers={'Authorization': f'Bearer {token}'}, data=data, files=files).json())
+            files["img_file"] = (
+                form.data["photo"].filename, form.data["photo"].read(), form.data["photo"].content_type)
+        print(requests.put(f"{API_SERVER}/api/users/{user['user']['id']}", headers={'Authorization': f'Bearer {token}'},
+                           data=data, files=files).json())
         return redirect("/")
     form.nickname.data = user['user']['nickname']
     form.about.data = user['user']['about']
@@ -201,9 +200,11 @@ def add_notepage():
             'remove_audio': form.remove_audio.data}
         files = {}
         if form.data["img_file"]:
-            files["img_file"] = (form.data["img_file"].filename, form.data["img_file"].read(), form.data["img_file"].content_type)
+            files["img_file"] = (
+                form.data["img_file"].filename, form.data["img_file"].read(), form.data["img_file"].content_type)
         if form.data["audio_file"]:
-            files["audio_file"] = (form.data["audio_file"].filename, form.data["audio_file"].read(), form.data["audio_file"].content_type)
+            files["audio_file"] = (
+                form.data["audio_file"].filename, form.data["audio_file"].read(), form.data["audio_file"].content_type)
         requests.post(f'{API_SERVER}/api/notes', headers={'Authorization': f'Bearer {token}'}, data=data, files=files)
         return redirect('/')
     return render_template('note.html', form=form, **param)
@@ -230,10 +231,13 @@ def edit_note(note_id):
             'remove_audio': form.remove_audio.data}
         files = {}
         if form.data["img_file"]:
-            files["img_file"] = (form.data["img_file"].filename, form.data["img_file"].read(), form.data["img_file"].content_type)
+            files["img_file"] = (
+                form.data["img_file"].filename, form.data["img_file"].read(), form.data["img_file"].content_type)
         if form.data["audio_file"]:
-            files["audio_file"] = (form.data["audio_file"].filename, form.data["audio_file"].read(), form.data["audio_file"].content_type)
-        requests.put(f'{API_SERVER}/api/notes/{note_id}', headers={'Authorization': f'Bearer {token}'}, data=data, files=files)
+            files["audio_file"] = (
+                form.data["audio_file"].filename, form.data["audio_file"].read(), form.data["audio_file"].content_type)
+        requests.put(f'{API_SERVER}/api/notes/{note_id}', headers={'Authorization': f'Bearer {token}'}, data=data,
+                     files=files)
         return redirect('/')
     form.text.data = note['text']
     form.category.data = note['category']
@@ -247,7 +251,7 @@ def delete_notepage(note_id):
     if is_token_valid:
         requests.delete(f'{API_SERVER}/api/notes/{note_id}', headers={'Authorization': f'Bearer {token}'})
     return redirect('/')
-    
+
 
 @app.route("/register", methods=['GET', 'POST'])
 def registerpage():
@@ -266,8 +270,10 @@ def registerpage():
             'about': form.about.data}
         files = {}
         if form.data["photo"]:
-            files["img_file"] = (form.data["photo"].filename, form.data["photo"].read(), form.data["photo"].content_type)
-        response = requests.post(f'{API_SERVER}/api/users', headers={'Authorization': f'Bearer {token}'}, data=data, files=files)
+            files["img_file"] = (
+                form.data["photo"].filename, form.data["photo"].read(), form.data["photo"].content_type)
+        response = requests.post(f'{API_SERVER}/api/users', headers={'Authorization': f'Bearer {token}'}, data=data,
+                                 files=files)
         if response:
             data = requests.get(f'{API_SERVER}/api/token', auth=(form.email.data, form.password.data)).json()
             res = make_response(redirect("/"))

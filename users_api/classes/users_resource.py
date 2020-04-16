@@ -2,9 +2,8 @@ from flask_restful import reqparse, Resource, abort, request
 from flask import jsonify, g
 from data.users import User
 from data import db_session
-from api_auth import auth, token_auth
+from api_auth import token_auth
 from files import *
-
 
 parser = reqparse.RequestParser()
 parser.add_argument('password')
@@ -52,4 +51,3 @@ class UsersResource(Resource):
             session.commit()
             return jsonify({'success': 'OK'})
         abort(403, error="Forbidden")
-    

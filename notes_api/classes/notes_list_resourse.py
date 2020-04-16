@@ -1,14 +1,11 @@
 from flask_restful import reqparse, Resource, abort, request
 from data.categories import Category
 from flask import jsonify, g
-from sqlalchemy import desc
 from api_auth import token_auth
 from data.notes import Note
 from data.users import User
 from data import db_session
 from files import *
-import uuid
-
 
 parser = reqparse.RequestParser()
 parser.add_argument('text')
